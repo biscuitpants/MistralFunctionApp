@@ -1,0 +1,18 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore editor settings
+.vscode/
+*.bak
+
+# Ignore local settings and sensitive files
+local.settings
+
+# Ignore environment folders
+.python_packages/
+.env/
+
+# Ignore Git-related temporary files
+*.log
+.DS_Store
