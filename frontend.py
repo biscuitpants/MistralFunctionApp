@@ -1,43 +1,52 @@
 import streamlit as st
 import requests
-import json
 
-# Set up the Streamlit app
-st.title("Mistral Function App UI")
-st.write("This is a user-friendly interface to interact with the Mistral AI model.")
+# Set page configuration
+st.set_page_config(page_title="MistralMind: A Conversational AI App", layout="centered")
 
-# Input text area
-user_input = st.text_area("Enter your text below:", placeholder="Type something here...")
+# Display the logo
+st.image("mistral_logo.png", width=200)
 
-# Model settings
-st.sidebar.title("Settings")
-temperature = st.sidebar.slider("Set Temperature:", 0.0, 1.0, 0.7)
-max_tokens = st.sidebar.number_input("Max Tokens:", min_value=1, max_value=512, value=50)
+# App Title and Description
+st.title("MistralMind: A Conversational AI App")
+st.markdown(
+    """
+    ### MistralMind is a serverless conversational AI application powered by Mistral's cutting-edge LLM technology, hosted on Azure.
+    Built with ❤️ for conversational excellence.
+    """
+)
 
-# Submit button
+# API Configuration
+MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions"
+MISTRAL_API_KEY = "3si9UxhIFCU8I10T3MRBunmzjTKayLlX"
+
+# Input Section
+st.markdown("#### Enter your query below:")
+user_input = st.text_input(label="", placeholder="Type your question here...")
+
+# Output Section
 if st.button("Submit"):
-    if not user_input:
-        st.warning("Please enter some text before submitting!")
+    if user_input.strip() == "":
+        st.error("Please enter text to ask Mistral.")
     else:
-        with st.spinner("Processing..."):
-            # Prepare the API request
-            endpoint = "https://mistralfunctionapp123.azurewebsites.net/api/ProcessText"
-            headers = {"Content-Type": "application/json"}
-            payload = json.dumps({
-                "input": user_input,
-                "temperature": temperature,
-                "max_tokens": max_tokens
-            })
+        # Prepare API Request
+        headers = {
+            "Authorization": f"Bearer {MISTRAL_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "open-mistral-7b",
+            "messages": [{"role": "user", "content": user_input}]
+        }
 
-            try:
-                response = requests.post(endpoint, headers=headers, data=payload)
+        # Make API Call
+        try:
+            response = requests.post(MISTRAL_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            result = response.json()
 
-                if response.status_code == 200:
-                    result = response.json()
-                    st.success("Response from Mistral:")
-                    st.json(result)
-                else:
-                    st.error(f"Error from API: {response.status_code}")
-                    st.error(response.text)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+            # Display Result
+            st.markdown("### Mistral's Response:")
+            st.write(result["choices"][0]["message"]["content"])
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
